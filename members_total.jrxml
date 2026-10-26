@@ -1,0 +1,219 @@
+<!-- Created with Jaspersoft Studio version 7.0.8.final using JasperReports Library version 7.0.8-6f896111  -->
+<jasperReport name="members_total" language="java" pageWidth="595" pageHeight="842" columnWidth="565" leftMargin="15" rightMargin="15" topMargin="15" bottomMargin="15" uuid="a6d6633d-1e40-4b2f-bc00-16ddd9dde98d">
+	<property name="com.jaspersoft.studio.data.default data adapter" value="esusu"/>
+	<parameter name="groupId" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[SELECT
+    m.FullName                                    AS MemberName,
+    m.PhoneNumber                                 AS PhoneNumber,
+    m.JoinDate                                    AS JoinDate,
+    m.MaturityDate                                AS MaturityDate,
+    COALESCE(c.total, 0)                          AS TotalContributions,
+    COALESCE(s.total, 0)                          AS TotalInterest,
+    COALESCE(w.total, 0)                          AS TotalWithdrawn,
+    COALESCE(l.outstanding, 0)                    AS LoanOutstanding,
+    (COALESCE(c.total, 0)
+     + COALESCE(s.total, 0)
+     - COALESCE(w.total, 0)
+     - COALESCE(l.outstanding, 0))                AS NetBalance
+FROM member m
+LEFT JOIN (
+    SELECT group_id, PhoneNumber, SUM(amount) AS total
+      FROM contributions
+     GROUP BY group_id, PhoneNumber
+) c ON c.group_id = m.group_id AND c.PhoneNumber = m.PhoneNumber
+LEFT JOIN (
+    SELECT group_id, PhoneNumber, SUM(interest_share) AS total
+      FROM interest_distribution_share
+     GROUP BY group_id, PhoneNumber
+) s ON s.group_id = m.group_id AND s.PhoneNumber = m.PhoneNumber
+LEFT JOIN (
+    SELECT group_id, PhoneNumber, SUM(amount_payable) AS total
+      FROM withdrawal_requests
+     WHERE status = CHAR(80,65,73,68)
+     GROUP BY group_id, PhoneNumber
+) w ON w.group_id = m.group_id AND w.PhoneNumber = m.PhoneNumber
+LEFT JOIN (
+    SELECT group_id, PhoneNumber,
+           SUM(principal + interest_amount - amount_repaid) AS outstanding
+      FROM loans
+     WHERE is_repaid = FALSE
+     GROUP BY group_id, PhoneNumber
+) l ON l.group_id = m.group_id AND l.PhoneNumber = m.PhoneNumber
+WHERE m.group_id = $P{groupId}
+ORDER BY NetBalance DESC]]></query>
+	<field name="MemberName" class="java.lang.String"/>
+	<field name="PhoneNumber" class="java.lang.String"/>
+	<field name="JoinDate" class="java.sql.Date"/>
+	<field name="MaturityDate" class="java.sql.Date"/>
+	<field name="TotalContributions" class="java.math.BigDecimal"/>
+	<field name="TotalInterest" class="java.math.BigDecimal"/>
+	<field name="TotalWithdrawn" class="java.math.BigDecimal"/>
+	<field name="LoanOutstanding" class="java.math.BigDecimal"/>
+	<field name="NetBalance" class="java.math.BigDecimal"/>
+	<variable name="RowNumber" calculation="Count" class="java.lang.Integer">
+		<expression><![CDATA[Boolean.TRUE]]></expression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="GroupTotalContributions" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{TotalContributions}]]></expression>
+		<initialValueExpression><![CDATA[new java.math.BigDecimal(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GroupTotalInterest" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{TotalInterest}]]></expression>
+		<initialValueExpression><![CDATA[new java.math.BigDecimal(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GroupTotalWithdrawn" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{TotalWithdrawn}]]></expression>
+		<initialValueExpression><![CDATA[new java.math.BigDecimal(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GroupTotalLoans" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{LoanOutstanding}]]></expression>
+		<initialValueExpression><![CDATA[new java.math.BigDecimal(0)]]></initialValueExpression>
+	</variable>
+	<variable name="GroupTotalNet" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{NetBalance}]]></expression>
+		<initialValueExpression><![CDATA[new java.math.BigDecimal(0)]]></initialValueExpression>
+	</variable>
+	<title height="50" splitType="Stretch">
+		<element kind="rectangle" uuid="6dd87b94-8a1b-4938-9293-d1c5b1579ed4" x="0" y="0" width="565" height="22" forecolor="#0E38C2"/>
+		<element kind="textField" uuid="3f944c16-3993-4f5f-9f73-72f5892dea11" x="0" y="0" width="565" height="22" forecolor="#FFFFFF" fontSize="13.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<expression><![CDATA["TIMAATABA SUSU"]]></expression>
+		</element>
+		<element kind="textField" uuid="999e0167-8e88-42ef-a107-a42c0eef2e98" x="0" y="24" width="565" height="14" forecolor="#1E2B3C" fontSize="11.0" bold="true" hTextAlign="Center">
+			<expression><![CDATA["Members And Total Contribution"]]></expression>
+		</element>
+		<element kind="line" uuid="99729b41-fdf6-4d4f-bdbb-76429f6608ee" x="0" y="42" width="565" height="1">
+			<pen lineWidth="1.5" lineColor="#0E38C2"/>
+		</element>
+	</title>
+	<pageHeader height="14" splitType="Stretch">
+		<element kind="textField" uuid="caf11a8e-8db0-41bc-a971-5994efd98f55" x="365" y="0" width="200" height="12" forecolor="#6C7A89" fontSize="7.0" pattern="dd MMM yyyy HH:mm" hTextAlign="Right">
+			<expression><![CDATA["Printed: " + new java.util.Date()]]></expression>
+		</element>
+	</pageHeader>
+	<columnHeader height="18" splitType="Stretch">
+		<element kind="rectangle" uuid="9a8f75a3-4dd1-4f94-82e0-cd36cfd6185e" x="0" y="0" width="565" height="16" forecolor="#E8F3EE">
+			<pen lineWidth="0.5" lineColor="#0E38C2"/>
+		</element>
+		<element kind="staticText" uuid="7152edd0-547b-4f6f-a0c0-c47638c5f691" x="2" y="0" width="30" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[#]]></text>
+		</element>
+		<element kind="staticText" uuid="a8e649e4-934f-4f12-a636-bb5e3b1aa9eb" x="34" y="0" width="80" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Name]]></text>
+		</element>
+		<element kind="staticText" uuid="4dd20a6a-7f94-4f16-a7f0-84bfa4a69fe3" x="116" y="0" width="65" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Phone]]></text>
+		</element>
+		<element kind="staticText" uuid="9492b71d-10ad-457c-a4a3-5d0200051fdb" x="183" y="0" width="55" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Join]]></text>
+		</element>
+		<element kind="staticText" uuid="8f973cf1-61a5-49f9-88fa-0dc4a3c92774" x="240" y="0" width="65" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Contrib.]]></text>
+		</element>
+		<element kind="staticText" uuid="d08ab8f0-04fa-4509-a652-26ef9ffd9dc5" x="307" y="0" width="55" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Interest]]></text>
+		</element>
+		<element kind="staticText" uuid="1f6d343b-1fc2-4fa8-8cef-7d4e94f361f7" x="364" y="0" width="55" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Withdrawn]]></text>
+		</element>
+		<element kind="staticText" uuid="c8080c2d-4caa-4a06-8783-19513205e399" x="421" y="0" width="50" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Loans]]></text>
+		</element>
+		<element kind="staticText" uuid="c9f0640a-3751-4782-82ef-da2d1cb905e9" x="473" y="0" width="55" height="16" forecolor="#0E38C2" fontSize="7.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Net Bal]]></text>
+		</element>
+		<element kind="staticText" uuid="1536a561-9f0c-447a-95c0-c5e09f87c5da" x="530" y="0" width="33" height="16" forecolor="#0E38C2" fontSize="6.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Maturity]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<element kind="line" uuid="f6559c63-99fc-4094-89a7-036765830e89" x="0" y="13" width="565" height="1">
+				<pen lineWidth="0.25" lineColor="#E8F3EE"/>
+			</element>
+			<element kind="textField" uuid="4dbc8a58-d7c1-49c4-aa91-7cdd113fa90b" x="2" y="0" width="30" height="12" forecolor="#1E2B37" fontSize="7.0" bold="true" hTextAlign="Center">
+				<expression><![CDATA[$V{RowNumber}]]></expression>
+			</element>
+			<element kind="textField" uuid="7d09a07b-1d33-4221-b764-98a970d7c620" x="34" y="0" width="80" height="12" forecolor="#1E2B37" fontSize="7.0" blankWhenNull="true" hTextAlign="Center">
+				<expression><![CDATA[$F{MemberName}]]></expression>
+			</element>
+			<element kind="textField" uuid="8928123f-ac4d-405b-9cc0-c566de932499" x="116" y="0" width="65" height="12" forecolor="#1E2B37" fontSize="7.0" blankWhenNull="true" hTextAlign="Center">
+				<expression><![CDATA[$F{PhoneNumber}]]></expression>
+			</element>
+			<element kind="textField" uuid="356fb049-029d-4a37-b815-a7fb661177ef" x="183" y="0" width="55" height="12" forecolor="#1E2B37" fontSize="7.0" pattern="dd/MM/yy" blankWhenNull="true" hTextAlign="Center">
+				<expression><![CDATA[$F{JoinDate}]]></expression>
+			</element>
+			<element kind="textField" uuid="bde224fd-453e-43d8-a400-7edb6b25bb54" x="240" y="0" width="65" height="12" forecolor="#1E2B37" fontSize="7.0" pattern="#,##0.00" hTextAlign="Center">
+				<expression><![CDATA[$F{TotalContributions}]]></expression>
+			</element>
+			<element kind="textField" uuid="94f1435a-273c-44bc-836f-88cf0a76bb56" x="307" y="0" width="55" height="12" forecolor="#1E2B37" fontSize="7.0" pattern="#,##0.00" hTextAlign="Center">
+				<expression><![CDATA[$F{TotalInterest}]]></expression>
+			</element>
+			<element kind="textField" uuid="db1f0625-677d-4165-aabf-fe27854a040f" x="364" y="0" width="55" height="12" forecolor="#B71C1C" fontSize="7.0" pattern="#,##0.00" hTextAlign="Center">
+				<expression><![CDATA[$F{TotalWithdrawn}]]></expression>
+			</element>
+			<element kind="textField" uuid="ca3c3711-ae04-415c-8781-0d05ac698ad4" x="421" y="0" width="50" height="12" forecolor="#B71C1C" fontSize="7.0" pattern="#,##0.00" hTextAlign="Center">
+				<expression><![CDATA[$F{LoanOutstanding}]]></expression>
+			</element>
+			<element kind="textField" uuid="dc31bb4d-9184-4b28-af8c-e35f9abd36d5" x="473" y="0" width="55" height="12" forecolor="#1E8449" fontSize="7.0" pattern="#,##0.00" bold="true" hTextAlign="Center">
+				<expression><![CDATA[$F{NetBalance}]]></expression>
+			</element>
+			<element kind="textField" uuid="d91926c2-8e8c-4208-801b-4f9de4351b7e" x="530" y="0" width="33" height="12" forecolor="#6C7A89" fontSize="6.0" pattern="dd/MM/yy" blankWhenNull="true" hTextAlign="Center">
+				<expression><![CDATA[$F{MaturityDate}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="3" splitType="Stretch"/>
+	<pageFooter height="16" splitType="Stretch">
+		<element kind="line" uuid="9a6049cc-f83c-48cf-9663-5f2e61353aa1" x="0" y="0" width="565" height="1">
+			<pen lineWidth="0.5" lineColor="#CFEADD"/>
+		</element>
+		<element kind="textField" uuid="b435b09a-48ff-426c-ae4f-6d46b857ba52" x="0" y="3" width="400" height="11" forecolor="#6C7A89" fontSize="7.0" italic="true">
+			<expression><![CDATA["Timaataba Susu  |  Members & Totals  |  Confidential"]]></expression>
+		</element>
+		<element kind="textField" uuid="96d85e2c-b822-4dae-9188-46b65eb0a2a8" x="415" y="3" width="150" height="11" forecolor="#6C7A89" fontSize="7.0" italic="true" hTextAlign="Right">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="95" splitType="Stretch">
+		<element kind="line" uuid="4f91c907-808d-4403-b891-41ba0e24ae97" x="0" y="4" width="565" height="1">
+			<pen lineWidth="1.5" lineColor="#0E38C2"/>
+		</element>
+		<element kind="staticText" uuid="d2211257-3788-4dc1-b4b9-dad77a79b8ef" x="0" y="8" width="565" height="12" forecolor="#1E2B3C" fontSize="9.0" bold="true">
+			<text><![CDATA[GROUP TOTALS]]></text>
+		</element>
+		<element kind="staticText" uuid="0799cc5c-e3ca-486e-ba05-ffc006575ae1" x="10" y="23" width="250" height="11" forecolor="#6C7A89" fontSize="7.0" bold="true">
+			<text><![CDATA[Total Contributions:]]></text>
+		</element>
+		<element kind="textField" uuid="bd67371f-013c-4142-90ef-e22bfe1ea94e" x="270" y="23" width="110" height="11" forecolor="#1E2B37" fontSize="7.0" pattern="#,##0.00" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$V{GroupTotalContributions}]]></expression>
+		</element>
+		<element kind="staticText" uuid="c64f1dd8-bd77-417a-a8f4-eb9d231ca434" x="10" y="35" width="250" height="11" forecolor="#6C7A89" fontSize="7.0" bold="true">
+			<text><![CDATA[Total Interest:]]></text>
+		</element>
+		<element kind="textField" uuid="b397ad99-0831-44f7-8db5-888ae9d08f50" x="270" y="35" width="110" height="11" forecolor="#1E2B37" fontSize="7.0" pattern="#,##0.00" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$V{GroupTotalInterest}]]></expression>
+		</element>
+		<element kind="staticText" uuid="21ad54a4-b133-4c4f-9428-10ac49527778" x="10" y="47" width="250" height="11" forecolor="#6C7A89" fontSize="7.0" bold="true">
+			<text><![CDATA[Total Withdrawn:]]></text>
+		</element>
+		<element kind="textField" uuid="ce291c61-8ede-4d4f-9ebd-8fa9b3f3ea0f" x="270" y="47" width="110" height="11" forecolor="#B71C1C" fontSize="7.0" pattern="#,##0.00" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$V{GroupTotalWithdrawn}]]></expression>
+		</element>
+		<element kind="staticText" uuid="d28afcca-0ddf-4175-9b1e-35a0bd5f1678" x="10" y="59" width="250" height="11" forecolor="#6C7A89" fontSize="7.0" bold="true">
+			<text><![CDATA[Total Loans Outstanding:]]></text>
+		</element>
+		<element kind="textField" uuid="b9adf44c-8c32-476c-ba99-a4c1f516998e" x="270" y="59" width="110" height="11" forecolor="#B71C1C" fontSize="7.0" pattern="#,##0.00" bold="true" hTextAlign="Right">
+			<expression><![CDATA[$V{GroupTotalLoans}]]></expression>
+		</element>
+		<element kind="rectangle" uuid="97fcc00d-780d-4e86-b182-4c6384d0dbb5" x="0" y="72" width="565" height="18" forecolor="#0E38C2"/>
+		<element kind="staticText" uuid="c42f7438-3e7f-4778-abfa-8808898e38f8" x="10" y="72" width="250" height="18" forecolor="#FFFFFF" fontSize="9.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[GROUP NET BALANCE]]></text>
+		</element>
+		<element kind="textField" uuid="2732729c-e1ba-49da-a059-f7ed81e9724f" x="270" y="72" width="110" height="18" forecolor="#FFFFFF" fontSize="10.0" pattern="#,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$V{GroupTotalNet}]]></expression>
+		</element>
+	</summary>
+</jasperReport>

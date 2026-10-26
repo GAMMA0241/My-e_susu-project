@@ -1,0 +1,165 @@
+<!-- Created with Jaspersoft Studio version 7.0.8.final using JasperReports Library version 7.0.8-6f896111  -->
+<jasperReport name="withdrawal_statement" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4bd05aab-3f11-46f4-aa5e-028ea60a55ee">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="esusu"/>
+	<parameter name="groupId" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fromDate" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="toDate" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="status" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[SELECT
+    w.id                                          AS RequestId,
+    w.PhoneNumber                                 AS PhoneNumber,
+    m.FullName                                    AS MemberName,
+    w.request_type                                AS RequestType,
+    w.contribution                                AS Contribution,
+    w.interest_share                              AS InterestShare,
+    w.penalty                                     AS Penalty,
+    w.amount_payable                              AS AmountPayable,
+    w.status                                      AS Status,
+    w.requested_on                                AS RequestedOn,
+    w.processed_on                                AS ProcessedOn,
+    w.processed_by                                AS ProcessedBy,
+    w.notes                                       AS Notes,
+    w.target_group_name                           AS TargetGroup,
+    w.target_bank_account                         AS TargetBankAccount,
+    w.momo_number                                 AS MomoNumber,
+    DATEDIFF(CURDATE(), DATE(w.requested_on))     AS DaysPending
+FROM withdrawal_requests w
+INNER JOIN member m
+    ON m.group_id    = w.group_id
+   AND m.PhoneNumber = w.PhoneNumber
+WHERE w.group_id = $P{groupId}
+
+ORDER BY w.requested_on DESC, w.id DESC]]></query>
+	<field name="RequestId" class="java.lang.Integer"/>
+	<field name="PhoneNumber" class="java.lang.String"/>
+	<field name="MemberName" class="java.lang.String"/>
+	<field name="RequestType" class="java.lang.String"/>
+	<field name="Contribution" class="java.math.BigDecimal"/>
+	<field name="InterestShare" class="java.math.BigDecimal"/>
+	<field name="Penalty" class="java.math.BigDecimal"/>
+	<field name="AmountPayable" class="java.math.BigDecimal"/>
+	<field name="Status" class="java.lang.String"/>
+	<field name="RequestedOn" class="java.sql.Timestamp"/>
+	<field name="ProcessedOn" class="java.sql.Date"/>
+	<field name="ProcessedBy" class="java.lang.String"/>
+	<field name="Notes" class="java.lang.String"/>
+	<field name="TargetGroup" class="java.lang.String"/>
+	<field name="TargetBankAccount" class="java.lang.String"/>
+	<field name="MomoNumber" class="java.lang.String"/>
+	<field name="DaysPending" class="java.lang.Long"/>
+	<title height="92" splitType="Stretch">
+		<element kind="textField" uuid="8094b427-bc27-46e1-9604-2494caf05a42" x="0" y="0" width="555" height="28" forecolor="#1E8449" fontSize="20.0" evaluationTime="Report" bold="true" hTextAlign="Center">
+			<expression><![CDATA["Timaataba Susu"]]></expression>
+		</element>
+		<element kind="textField" uuid="cfce3e12-a635-4dfb-9b9c-66c4661bcfae" x="0" y="30" width="555" height="20" forecolor="#34495E" fontSize="13.0" evaluationTime="Report" bold="true" hTextAlign="Center">
+			<expression><![CDATA["Withdrawal Audit Trail"]]></expression>
+		</element>
+		<element kind="line" uuid="e9b03b7a-f7b0-4aaa-8d53-4bfb89e6d315" x="0" y="56" width="555" height="2">
+			<pen lineWidth="2.0" lineColor="#1E8449"/>
+		</element>
+		<element kind="textField" uuid="5c489681-53bc-419f-b43f-a696476a251a" x="0" y="66" width="300" height="16" forecolor="#6C7A89" fontSize="9.0">
+			<expression><![CDATA["Group: " + $P{groupId}]]></expression>
+		</element>
+		<element kind="textField" uuid="f56b19af-8318-4736-89da-7d672e800b1f" x="355" y="66" width="200" height="16" forecolor="#6C7A89" fontSize="9.0" pattern="dd MMM yyyy HH:mm" hTextAlign="Right">
+			<expression><![CDATA["Printed: " + new java.util.Date()]]></expression>
+		</element>
+		<element kind="line" uuid="a7292faa-a9e0-4d0b-916d-f8eba52f617a" x="0" y="86" width="555" height="1">
+			<pen lineWidth="0.5" lineColor="#CFEADD"/>
+		</element>
+	</title>
+	<pageHeader height="30" splitType="Stretch">
+		<element kind="rectangle" uuid="cf57cf35-0923-4662-9801-57097ff34946" x="0" y="0" width="555" height="28" forecolor="#E8F3EE">
+			<pen lineWidth="0.5" lineColor="#CFEADD"/>
+		</element>
+		<element kind="staticText" uuid="eeed71ca-2dea-4779-b6b7-ef8e61cbe9f8" x="2" y="0" width="40" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[ID]]></text>
+		</element>
+		<element kind="staticText" uuid="f051a6fe-37e2-4803-84f3-bb984c85ba78" x="44" y="0" width="120" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Member]]></text>
+		</element>
+		<element kind="staticText" uuid="15f3c180-f513-4df6-84f6-d25853ff0367" x="166" y="0" width="85" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Phone]]></text>
+		</element>
+		<element kind="staticText" uuid="859437eb-f2bd-4d0b-87b8-0060e9ca767c" x="253" y="0" width="80" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Type]]></text>
+		</element>
+		<element kind="staticText" uuid="28d5ecba-c4df-498a-8d0f-69e8b21c1130" x="335" y="0" width="80" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Amount (GHS)]]></text>
+		</element>
+		<element kind="staticText" uuid="1afbf8d9-57d7-4ec9-ba35-cb464f8ef8ab" x="417" y="0" width="70" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Status]]></text>
+		</element>
+		<element kind="staticText" uuid="aeb189b0-83f9-4339-801b-f4230c2902a6" x="489" y="0" width="66" height="28" forecolor="#1E8449" fontSize="8.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Processed]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="4" splitType="Stretch"/>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<element kind="line" uuid="39049d75-5b51-4e09-aadf-706bb6a1f77d" x="0" y="23" width="555" height="1">
+				<pen lineWidth="0.5" lineColor="#E8F3EE"/>
+			</element>
+			<element kind="textField" uuid="05964af2-dbb9-4b86-a4ae-f9eb62971315" x="2" y="3" width="40" height="18" forecolor="#1E2B37" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[$F{RequestId}]]></expression>
+			</element>
+			<element kind="textField" uuid="bf13af4b-1ff8-43b3-8ed0-4fe178efe0ba" x="44" y="3" width="120" height="18" forecolor="#1E2B37" fontSize="8.0" blankWhenNull="true">
+				<expression><![CDATA[$F{MemberName}]]></expression>
+			</element>
+			<element kind="textField" uuid="df7d2262-8eca-4250-82e2-c9acaf54d1ad" x="166" y="3" width="85" height="18" forecolor="#1E2B37" fontSize="8.0" blankWhenNull="true">
+				<expression><![CDATA[$F{PhoneNumber}]]></expression>
+			</element>
+			<element kind="textField" uuid="a38a0598-f93a-47c5-bd7d-ceb50f196194" x="253" y="3" width="80" height="18" forecolor="#1E2B37" fontSize="8.0" blankWhenNull="true">
+				<expression><![CDATA[$F{RequestType}]]></expression>
+			</element>
+			<element kind="textField" uuid="7c7b63e9-55da-4c54-9a3e-82d8a1622f7c" x="335" y="3" width="80" height="18" forecolor="#1E2B37" fontSize="8.0" pattern="#,##0.00" blankWhenNull="true" hTextAlign="Center">
+				<expression><![CDATA[$F{AmountPayable}]]></expression>
+			</element>
+			<element kind="textField" uuid="afbdd0c9-6e5e-47b2-a680-50d37b505d0c" x="417" y="3" width="70" height="18" forecolor="#1E2B37" fontSize="8.0" blankWhenNull="true" hTextAlign="Center">
+				<expression><![CDATA[$F{Status}]]></expression>
+			</element>
+			<element kind="textField" uuid="f54b4e77-5044-4c78-a7e8-551c7792450b" x="489" y="3" width="66" height="18" forecolor="#1E2B37" fontSize="8.0" pattern="dd MMM yyyy" blankWhenNull="true">
+				<expression><![CDATA[$F{ProcessedOn}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="4" splitType="Stretch"/>
+	<pageFooter height="30" splitType="Stretch">
+		<element kind="line" uuid="155cb7bc-f1b2-4877-8a34-c0117712f285" x="0" y="0" width="555" height="1">
+			<pen lineWidth="0.5" lineColor="#CFEADD"/>
+		</element>
+		<element kind="textField" uuid="096deed6-5427-4f7c-9dbc-289e6c110b1d" x="0" y="6" width="400" height="16" forecolor="#6C7A89" fontSize="8.0" italic="true">
+			<expression><![CDATA["Timaataba Susu  |  Withdrawal Audit  |  Confidential"]]></expression>
+		</element>
+		<element kind="textField" uuid="a8be9470-a9c1-4ae8-89ab-61ea4a4586e1" x="405" y="6" width="150" height="16" forecolor="#6C7A89" fontSize="8.0" italic="true" hTextAlign="Right">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="100" splitType="Stretch">
+		<element kind="line" uuid="69f499a0-bfb2-4342-9277-a5e17de508f0" x="0" y="10" width="555" height="2">
+			<pen lineWidth="2.0" lineColor="#1E8449"/>
+		</element>
+		<element kind="staticText" uuid="de4fb318-51cc-4b55-b1a7-1504934ef98f" x="0" y="20" width="555" height="16" forecolor="#1E2B3C" fontSize="10.0" bold="true">
+			<text><![CDATA[Signatories]]></text>
+		</element>
+		<element kind="line" uuid="869e8eac-51bd-46b5-8288-dab0f3e2ef7f" x="10" y="55" width="240" height="1">
+			<pen lineWidth="0.5" lineColor="#34495E"/>
+		</element>
+		<element kind="staticText" uuid="d08508a6-ab36-485b-b45d-b9e63b4edab4" x="10" y="60" width="240" height="14" forecolor="#6C7A89" fontSize="8.0">
+			<text><![CDATA[Chairman Signature & Date]]></text>
+		</element>
+		<element kind="line" uuid="82f7d8b6-9697-4d39-9fd1-cedca778cc21" x="305" y="55" width="240" height="1">
+			<pen lineWidth="0.5" lineColor="#34495E"/>
+		</element>
+		<element kind="staticText" uuid="76150afc-0afc-42ad-b2e5-37e8a3ff7dc5" x="305" y="60" width="240" height="14" forecolor="#6C7A89" fontSize="8.0">
+			<text><![CDATA[Treasurer Signature & Date]]></text>
+		</element>
+	</summary>
+</jasperReport>

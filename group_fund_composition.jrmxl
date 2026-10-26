@@ -1,0 +1,193 @@
+<!-- Created with Jaspersoft Studio version 7.0.8.final using JasperReports Library version 7.0.8-6f896111  -->
+<jasperReport name="group_fund_composition" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c23537f9-f970-462e-bf0a-024eea2e87c3">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="esusu"/>
+	<style name="Title" forecolor="#1F3864" fontName="SansSerif" fontSize="18.0" bold="true"/>
+	<style name="SubTitle" forecolor="#555555" fontName="SansSerif" fontSize="11.0" bold="true"/>
+	<style name="HeaderCell" mode="Opaque" forecolor="#FFFFFF" backcolor="#2E5C8A" hTextAlign="Center" vTextAlign="Middle" fontName="SansSerif" fontSize="10.0" bold="true"/>
+	<style name="TableCell" vTextAlign="Middle" fontName="SansSerif" fontSize="10.0"/>
+	<style name="Money" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0.00" fontName="SansSerif" fontSize="10.0"/>
+	<style name="Percent" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0.00'%'" fontName="SansSerif" fontSize="10.0"/>
+	<style name="AngleCell" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0.00'°'" fontName="SansSerif" fontSize="10.0"/>
+	<style name="TotalCell" mode="Opaque" backcolor="#D9E2F3" vTextAlign="Middle" fontName="SansSerif" fontSize="11.0" bold="true"/>
+	<style name="TotalMoney" mode="Opaque" backcolor="#D9E2F3" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0.00" fontName="SansSerif" fontSize="11.0" bold="true"/>
+	<style name="TotalAngle" mode="Opaque" backcolor="#D9E2F3" hTextAlign="Right" vTextAlign="Middle" pattern="#,##0.00'°'" fontName="SansSerif" fontSize="11.0" bold="true"/>
+	<parameter name="groupId" class="java.lang.String">
+		<defaultValueExpression><![CDATA["2"]]></defaultValueExpression>
+	</parameter>
+	<query language="SQL"><![CDATA[SELECT
+    g.id                                                        AS group_id,
+    COALESCE(g.group_name, '')                                  AS group_name,
+
+    COALESCE(c.total_contributions, 0)                          AS total_contributions,
+    COALESCE(l.principal_out, 0)                                AS principal_out_loan,
+    COALESCE(l.outstanding_interest, 0)                         AS outstanding_interest,
+    COALESCE(li.interest_gained, 0)                             AS interest_gained,
+
+    ( COALESCE(c.total_contributions, 0)
+    + COALESCE(l.outstanding_interest, 0)
+    + COALESCE(li.interest_gained, 0) )                         AS total_group_money,
+
+    COALESCE(
+        ROUND(COALESCE(c.total_contributions, 0) * 360.0
+            / NULLIF( COALESCE(c.total_contributions, 0)
+                    + COALESCE(l.outstanding_interest, 0)
+                    + COALESCE(li.interest_gained, 0), 0), 2)
+    , 0)                                                        AS angle_contributions,
+
+    COALESCE(
+        ROUND(COALESCE(l.principal_out, 0) * 360.0
+            / NULLIF( COALESCE(c.total_contributions, 0)
+                    + COALESCE(l.outstanding_interest, 0)
+                    + COALESCE(li.interest_gained, 0), 0), 2)
+    , 0)                                                        AS angle_principal_out_loan,
+
+    COALESCE(
+        ROUND(COALESCE(l.outstanding_interest, 0) * 360.0
+            / NULLIF( COALESCE(c.total_contributions, 0)
+                    + COALESCE(l.outstanding_interest, 0)
+                    + COALESCE(li.interest_gained, 0), 0), 2)
+    , 0)                                                        AS angle_outstanding_interest,
+
+    COALESCE(
+        ROUND(COALESCE(li.interest_gained, 0) * 360.0
+            / NULLIF( COALESCE(c.total_contributions, 0)
+                    + COALESCE(l.outstanding_interest, 0)
+                    + COALESCE(li.interest_gained, 0), 0), 2)
+    , 0)                                                        AS angle_interest_gained
+
+FROM `groups` g
+LEFT JOIN (
+    SELECT group_id, SUM(amount) AS total_contributions
+    FROM contributions GROUP BY group_id
+) c  ON c.group_id = g.id
+LEFT JOIN (
+    SELECT group_id,
+           SUM(principal - amount_repaid)          AS principal_out,
+           SUM(interest_amount * (`is_repaid` = 0)) AS outstanding_interest
+    FROM loans GROUP BY group_id
+) l  ON l.group_id = g.id
+LEFT JOIN (
+    SELECT group_id, SUM(amount) AS interest_gained
+    FROM loan_interest GROUP BY group_id
+) li ON li.group_id = g.id
+WHERE g.id = $P!{groupId}]]></query>
+	<field name="group_id" class="java.lang.String"/>
+	<field name="group_name" class="java.lang.String"/>
+	<field name="total_contributions" class="java.math.BigDecimal"/>
+	<field name="principal_out_loan" class="java.math.BigDecimal"/>
+	<field name="outstanding_interest" class="java.math.BigDecimal"/>
+	<field name="interest_gained" class="java.math.BigDecimal"/>
+	<field name="total_group_money" class="java.math.BigDecimal"/>
+	<field name="angle_contributions" class="java.math.BigDecimal"/>
+	<field name="angle_principal_out_loan" class="java.math.BigDecimal"/>
+	<field name="angle_outstanding_interest" class="java.math.BigDecimal"/>
+	<field name="angle_interest_gained" class="java.math.BigDecimal"/>
+	<background splitType="Stretch"/>
+	<title height="80" splitType="Stretch">
+		<element kind="staticText" uuid="11111111-1111-4111-8111-111111111101" x="0" y="5" width="555" height="30" style="Title">
+			<text><![CDATA[Group Fund Composition Report]]></text>
+		</element>
+		<element kind="textField" uuid="11111111-1111-4111-8111-111111111102" x="0" y="40" width="555" height="20" style="SubTitle">
+			<expression><![CDATA["Group: " + $F{group_name} + "  (ID: " + $F{group_id} + ")"]]></expression>
+		</element>
+		<element kind="line" uuid="11111111-1111-4111-8111-111111111103" x="0" y="68" width="555" height="1">
+			<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+		</element>
+	</title>
+	<pageHeader height="10" splitType="Stretch"/>
+	<columnHeader height="30" splitType="Stretch">
+		<element kind="staticText" uuid="22222222-2222-4222-8222-222222222201" x="0" y="0" width="255" height="30" style="HeaderCell">
+			<text><![CDATA[Component]]></text>
+		</element>
+		<element kind="staticText" uuid="22222222-2222-4222-8222-222222222202" x="255" y="0" width="150" height="30" style="HeaderCell">
+			<text><![CDATA[Amount (GHS)]]></text>
+		</element>
+		<element kind="staticText" uuid="22222222-2222-4222-8222-222222222203" x="405" y="0" width="150" height="30" style="HeaderCell">
+			<text><![CDATA[Slice Angle]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="140" splitType="Stretch">
+			<element kind="staticText" uuid="33333333-3333-4333-8333-333333333301" x="0" y="0" width="255" height="22" style="TableCell">
+				<text><![CDATA[Total Contributions]]></text>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-333333333302" x="255" y="0" width="150" height="22" style="Money">
+				<expression><![CDATA[$F{total_contributions}]]></expression>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-333333333303" x="405" y="0" width="150" height="22" style="AngleCell">
+				<expression><![CDATA[$F{angle_contributions}]]></expression>
+			</element>
+			<element kind="staticText" uuid="33333333-3333-4333-8333-333333333304" x="0" y="24" width="255" height="22" style="TableCell">
+				<text><![CDATA[Principal Out on Loan]]></text>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-333333333305" x="255" y="24" width="150" height="22" style="Money">
+				<expression><![CDATA[$F{principal_out_loan}]]></expression>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-333333333306" x="405" y="24" width="150" height="22" style="AngleCell">
+				<expression><![CDATA[$F{angle_principal_out_loan}]]></expression>
+			</element>
+			<element kind="staticText" uuid="33333333-3333-4333-8333-333333333307" x="0" y="48" width="255" height="22" style="TableCell">
+				<text><![CDATA[Outstanding Interest (Receivable)]]></text>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-333333333308" x="255" y="48" width="150" height="22" style="Money">
+				<expression><![CDATA[$F{outstanding_interest}]]></expression>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-333333333309" x="405" y="48" width="150" height="22" style="AngleCell">
+				<expression><![CDATA[$F{angle_outstanding_interest}]]></expression>
+			</element>
+			<element kind="staticText" uuid="33333333-3333-4333-8333-33333333330a" x="0" y="72" width="255" height="22" style="TableCell">
+				<text><![CDATA[Interest Already Gained]]></text>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-33333333330b" x="255" y="72" width="150" height="22" style="Money">
+				<expression><![CDATA[$F{interest_gained}]]></expression>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-33333333330c" x="405" y="72" width="150" height="22" style="AngleCell">
+				<expression><![CDATA[$F{angle_interest_gained}]]></expression>
+			</element>
+			<element kind="line" uuid="33333333-3333-4333-8333-33333333330d" x="0" y="98" width="555" height="1">
+				<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+			</element>
+			<element kind="staticText" uuid="33333333-3333-4333-8333-33333333330e" x="0" y="102" width="255" height="26" style="TotalCell">
+				<text><![CDATA[TOTAL GROUP MONEY]]></text>
+			</element>
+			<element kind="textField" uuid="33333333-3333-4333-8333-33333333330f" x="255" y="102" width="150" height="26" style="TotalMoney">
+				<expression><![CDATA[$F{total_group_money}]]></expression>
+			</element>
+			<element kind="staticText" uuid="33333333-3333-4333-8333-333333333310" x="405" y="102" width="150" height="26" style="TotalAngle">
+				<text><![CDATA[360.00°]]></text>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="20" splitType="Stretch"/>
+	<pageFooter height="30" splitType="Stretch">
+		<element kind="textField" uuid="55555555-5555-4555-8555-555555555501" x="0" y="10" width="555" height="15" forecolor="#888888" fontSize="8.0" hTextAlign="Right">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="341" splitType="Stretch">
+		<element kind="chart" uuid="a22f0c69-b85d-4d3a-9322-d7768f1d1297" x="20" y="10" width="515" height="320" showLegend="true" chartType="pie" legendPosition="Bottom">
+			<titleExpression><![CDATA["Fund Composition (slice angles in degrees)"]]></titleExpression>
+			<dataset kind="pie">
+				<series>
+					<keyExpression><![CDATA["Contributions"]]></keyExpression>
+					<valueExpression><![CDATA[$F{angle_contributions}.doubleValue()]]></valueExpression>
+					<labelExpression><![CDATA["Contributions: " + $F{angle_contributions}.setScale(2, java.math.RoundingMode.HALF_UP).toString() + "°"]]></labelExpression>
+				</series>
+				<series>
+					<keyExpression><![CDATA["Outstanding Interest"]]></keyExpression>
+					<valueExpression><![CDATA[$F{angle_outstanding_interest}.doubleValue()]]></valueExpression>
+					<labelExpression><![CDATA["Outstanding Interest: " + $F{angle_outstanding_interest}.setScale(2, java.math.RoundingMode.HALF_UP).toString() + "°"]]></labelExpression>
+				</series>
+				<series>
+					<keyExpression><![CDATA["Interest Gained"]]></keyExpression>
+					<valueExpression><![CDATA[$F{angle_interest_gained}.doubleValue()]]></valueExpression>
+					<labelExpression><![CDATA["Interest Gained: " + $F{angle_interest_gained}.setScale(2, java.math.RoundingMode.HALF_UP).toString() + "°"]]></labelExpression>
+				</series>
+			</dataset>
+			<plot labelFormat="" legendLabelFormat="">
+				<itemLabel/>
+			</plot>
+		</element>
+	</summary>
+</jasperReport>

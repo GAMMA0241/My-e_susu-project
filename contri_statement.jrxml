@@ -1,0 +1,207 @@
+<!-- Created with Jaspersoft Studio version 7.0.8.final using JasperReports Library version 7.0.8-6f896111  -->
+<jasperReport name="contri_statement" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="dd1762b3-a993-4aa3-b3e8-4e4fe6a9f9d0">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="esusu"/>
+    <parameter name="groupId" class="java.lang.Integer">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="phoneNumber" class="java.lang.String">
+        <defaultValueExpression><![CDATA["0551334966"]]></defaultValueExpression>
+    </parameter>
+    <query language="SQL"><![CDATA[SELECT
+    m.FullName,
+    m.PhoneNumber,
+    m.GhanaCardNumber,
+    m.JoinDate,
+    m.MaturityDate,
+    m.IsActive,
+    m.LeftEarly,
+    m.ExitDate,
+    m.group_id,
+    g.group_name,
+    COALESCE((SELECT SUM(c.amount) FROM contributions c
+               WHERE c.group_id = m.group_id AND c.PhoneNumber = m.PhoneNumber), 0) AS TotalContributions,
+    COALESCE((SELECT SUM(s.interest_share) FROM interest_distribution_share s
+               WHERE s.group_id = m.group_id AND s.PhoneNumber = m.PhoneNumber), 0) AS TotalInterest,
+    COALESCE((SELECT SUM(w.amount_payable) FROM withdrawal_requests w
+               WHERE w.group_id = m.group_id AND w.PhoneNumber = m.PhoneNumber
+                 AND w.status = 'PAID'), 0) AS TotalWithdrawn,
+    COALESCE((SELECT SUM(l.principal + l.interest_amount - l.amount_repaid) FROM loans l
+               WHERE l.group_id = m.group_id AND l.PhoneNumber = m.PhoneNumber
+                 AND l.is_repaid = FALSE), 0) AS LoanOutstanding,
+    (COALESCE((SELECT SUM(c.amount) FROM contributions c
+               WHERE c.group_id = m.group_id AND c.PhoneNumber = m.PhoneNumber), 0)
+     + COALESCE((SELECT SUM(s.interest_share) FROM interest_distribution_share s
+               WHERE s.group_id = m.group_id AND s.PhoneNumber = m.PhoneNumber), 0)
+     - COALESCE((SELECT SUM(w.amount_payable) FROM withdrawal_requests w
+               WHERE w.group_id = m.group_id AND w.PhoneNumber = m.PhoneNumber
+                 AND w.status = 'PAID'), 0)
+     - COALESCE((SELECT SUM(l.principal + l.interest_amount - l.amount_repaid) FROM loans l
+               WHERE l.group_id = m.group_id AND l.PhoneNumber = m.PhoneNumber
+                 AND l.is_repaid = FALSE), 0)) AS NetBalance
+FROM member m
+JOIN `groups` g ON g.id = m.group_id
+WHERE m.group_id    = $P{groupId}
+  AND m.PhoneNumber = $P{phoneNumber}]]></query>
+    <field name="FullName" class="java.lang.String"/>
+    <field name="PhoneNumber" class="java.lang.String"/>
+    <field name="GhanaCardNumber" class="java.lang.String"/>
+    <field name="JoinDate" class="java.sql.Date"/>
+    <field name="MaturityDate" class="java.sql.Date"/>
+    <field name="IsActive" class="java.lang.Boolean"/>
+    <field name="LeftEarly" class="java.lang.Boolean"/>
+    <field name="ExitDate" class="java.sql.Date"/>
+    <field name="group_id" class="java.lang.Integer"/>
+    <field name="group_name" class="java.lang.String"/>
+    <field name="TotalContributions" class="java.math.BigDecimal"/>
+    <field name="TotalInterest" class="java.math.BigDecimal"/>
+    <field name="TotalWithdrawn" class="java.math.BigDecimal"/>
+    <field name="LoanOutstanding" class="java.math.BigDecimal"/>
+    <field name="NetBalance" class="java.math.BigDecimal"/>
+    <title height="130" splitType="Stretch">
+        <element kind="textField" uuid="81c26abe-95fe-4594-b3e8-78cb2cfd900a" x="0" y="0" width="555" height="32" forecolor="#1E8449" fontSize="22.0" evaluationTime="Report" bold="true" hTextAlign="Center">
+            <expression><![CDATA["Timaataba Susu"]]></expression>
+        </element>
+        <element kind="textField" uuid="1d47ff59-ca5b-4e99-b239-5abbe699f1b5" x="0" y="36" width="555" height="22" forecolor="#34495E" fontSize="14.0" evaluationTime="Report" hTextAlign="Center">
+            <expression><![CDATA["Personal Statement of Account"]]></expression>
+        </element>
+        <element kind="line" uuid="5dd9650c-5b96-415c-b58f-a7783f5c943a" x="0" y="64" width="555" height="2">
+            <pen lineWidth="2.0" lineColor="#1E8449"/>
+        </element>
+        <element kind="textField" uuid="ff941447-7e7a-4a03-a7cf-2783ce0c4140" x="0" y="74" width="280" height="18" forecolor="#6C7A89" fontSize="10.0">
+            <expression><![CDATA["Group: " + $F{group_name}]]></expression>
+        </element>
+        <element kind="textField" uuid="03e8b7f6-0dc8-4bf0-b5d5-62706ff342e9" x="355" y="74" width="200" height="18" forecolor="#6C7A89" fontSize="10.0" pattern="dd MMM yyyy HH:mm" hTextAlign="Right">
+            <expression><![CDATA[new java.util.Date()]]></expression>
+        </element>
+        <element kind="line" uuid="b36c3e07-71fe-4256-b7af-79d79ab4ea14" x="0" y="100" width="555" height="1">
+            <pen lineWidth="0.5" lineColor="#CFEADD"/>
+        </element>
+    </title>
+    <pageHeader height="155" splitType="Stretch">
+        <element kind="staticText" uuid="9b9e423b-41a2-4dc2-80d2-603b069842d9" x="12" y="10" width="300" height="18" forecolor="#1E2B3C" fontSize="11.0" bold="true">
+            <text><![CDATA[MEMBER INFORMATION]]></text>
+        </element>
+        <element kind="staticText" uuid="00dd50cc-4b3f-482e-8f4a-1e516058dd84" x="10" y="40" width="90" height="18" forecolor="#6C7A89" fontSize="10.0" bold="true">
+            <text><![CDATA[Full Name]]></text>
+        </element>
+        <element kind="textField" uuid="71ecd17d-d20d-4fe7-a8c0-b29abebda9b7" x="10" y="58" width="260" height="20" forecolor="#1E2B37" fontSize="11.0">
+            <expression><![CDATA[$F{FullName}]]></expression>
+        </element>
+        <element kind="staticText" uuid="210ade9f-a1d0-4d57-b7e0-2439b0bbbc21" x="300" y="40" width="90" height="18" forecolor="#6C7A89" fontSize="10.0" bold="true">
+            <text><![CDATA[Phone]]></text>
+        </element>
+        <element kind="textField" uuid="b44be3f4-e40e-4157-9ed9-12b4f08866de" x="300" y="58" width="255" height="20" forecolor="#1E2B37" fontSize="11.0">
+            <expression><![CDATA[$F{PhoneNumber}]]></expression>
+        </element>
+        <element kind="staticText" uuid="94e1cf5f-21f4-4cb8-aabb-9210e652d25f" x="10" y="88" width="90" height="18" forecolor="#6C7A89" fontSize="10.0" bold="true">
+            <text><![CDATA[Ghana Card]]></text>
+        </element>
+        <element kind="textField" uuid="7aa6d860-9b93-495d-ac4c-477d6e0cafba" x="10" y="106" width="260" height="20" forecolor="#1E2B37" fontSize="11.0">
+            <expression><![CDATA[$F{GhanaCardNumber}]]></expression>
+        </element>
+        <element kind="staticText" uuid="b4af847d-5dc4-4560-910a-7925289eae4b" x="300" y="88" width="90" height="18" forecolor="#6C7A89" fontSize="10.0" bold="true">
+            <text><![CDATA[Status]]></text>
+        </element>
+        <element kind="textField" uuid="8bedbbb7-3446-4c25-ba0e-c7d7e2696e75" x="300" y="106" width="255" height="20" forecolor="#1E2B37" fontSize="11.0">
+            <expression><![CDATA[$F{IsActive} ? "Active" : "Inactive"]]></expression>
+        </element>
+        <element kind="line" uuid="20e6730d-c231-4fea-93fe-f5ef94c3c653" x="0" y="140" width="555" height="1">
+            <pen lineWidth="0.5" lineColor="#CFEADD"/>
+        </element>
+    </pageHeader>
+    <columnHeader height="42" splitType="Stretch">
+        <element kind="rectangle" uuid="63b89754-087c-4dbd-834f-093bb3639fc5" x="0" y="5" width="555" height="32" forecolor="#E8F3EE">
+            <pen lineWidth="0.5" lineColor="#CFEADD"/>
+        </element>
+        <element kind="staticText" uuid="56af9603-f10c-4c38-bd98-d777182885a9" x="15" y="5" width="420" height="32" forecolor="#1E8449" fontSize="11.0" bold="true" vTextAlign="Middle">
+            <text><![CDATA[Description]]></text>
+        </element>
+        <element kind="staticText" uuid="8760f174-0f00-470b-82a7-562c393471f9" x="440" y="5" width="100" height="32" forecolor="#1E8449" fontSize="11.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+            <text><![CDATA[Amount (GHS)]]></text>
+        </element>
+    </columnHeader>
+    <detail>
+        <band height="240" splitType="Stretch">
+            <element kind="line" uuid="29acd74e-5c50-4546-b113-fbadf1003e9c" x="0" y="0" width="555" height="1">
+                <pen lineWidth="0.5" lineColor="#E8F3EE"/>
+            </element>
+            <element kind="staticText" uuid="6c9c80be-c966-4a26-a7c1-a6048909b24e" x="15" y="8" width="420" height="22" forecolor="#1E2B37" fontSize="11.0">
+                <text><![CDATA[Total Contributions]]></text>
+            </element>
+            <element kind="textField" uuid="9a5ae8c4-5d30-4016-b674-35a9021a0bc5" x="440" y="8" width="100" height="22" forecolor="#1E2B37" fontSize="11.0" pattern="#,##0.00" hTextAlign="Right">
+                <expression><![CDATA[$F{TotalContributions}]]></expression>
+            </element>
+            <element kind="line" uuid="3b6a4ba6-9eaa-4574-9615-b3a64b04a95f" x="0" y="40" width="555" height="1">
+                <pen lineWidth="0.5" lineColor="#E8F3EE"/>
+            </element>
+            <element kind="staticText" uuid="973b92d5-19d5-4e29-82ea-e4d6876c1643" x="15" y="48" width="420" height="22" forecolor="#1E2B37" fontSize="11.0">
+                <text><![CDATA[Interest Earned]]></text>
+            </element>
+            <element kind="textField" uuid="ecf2a8c9-7821-440c-8381-3654458d96b6" x="440" y="48" width="100" height="22" forecolor="#1E2B37" fontSize="11.0" pattern="#,##0.00" hTextAlign="Right">
+                <expression><![CDATA[$F{TotalInterest}]]></expression>
+            </element>
+            <element kind="line" uuid="0a17fd41-9f87-48c6-9a3e-bde5414dd25d" x="0" y="80" width="555" height="1">
+                <pen lineWidth="0.5" lineColor="#E8F3EE"/>
+            </element>
+            <element kind="staticText" uuid="31497e7c-1fe4-411c-8685-3f54de4ee421" x="15" y="88" width="420" height="22" forecolor="#1E2B37" fontSize="11.0">
+                <text><![CDATA[Total Withdrawn]]></text>
+            </element>
+            <element kind="textField" uuid="6c0df1d9-e963-4970-a824-87ea89313f60" x="440" y="88" width="100" height="22" forecolor="#B71C1C" fontSize="11.0" pattern="#,##0.00" hTextAlign="Right">
+                <expression><![CDATA[$F{TotalWithdrawn}]]></expression>
+            </element>
+            <element kind="line" uuid="efe0c170-1010-42f3-a6c9-5cf10d678bdd" x="0" y="120" width="555" height="1">
+                <pen lineWidth="0.5" lineColor="#E8F3EE"/>
+            </element>
+            <element kind="staticText" uuid="0c3c2d64-4b27-4d94-98ef-e1b18c5eb0b1" x="15" y="128" width="420" height="22" forecolor="#1E2B37" fontSize="11.0">
+                <text><![CDATA[Loan Outstanding]]></text>
+            </element>
+            <element kind="textField" uuid="5941ffec-4b3c-462d-bde9-8a0257f2fd7a" x="440" y="128" width="100" height="22" forecolor="#B71C1C" fontSize="11.0" pattern="#,##0.00" hTextAlign="Right">
+                <expression><![CDATA[$F{LoanOutstanding}]]></expression>
+            </element>
+            <element kind="line" uuid="8650a5d1-1855-4898-8a5b-b1fb4f192848" x="0" y="160" width="555" height="1">
+                <pen lineWidth="0.5" lineColor="#E8F3EE"/>
+            </element>
+            <element kind="staticText" uuid="aa4e930a-1449-47b3-b3e7-66f03a383943" x="15" y="170" width="420" height="50" forecolor="#FFFFFF" fontSize="14.0" bold="true" vTextAlign="Middle">
+                <text><![CDATA[NET BALANCE]]></text>
+            </element>
+            <element kind="textField" uuid="f7dd89a6-8967-4f50-8ce7-fb8f8cf59ded" x="440" y="170" width="100" height="50" forecolor="#FFFFFF" fontSize="16.0" pattern="#,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+                <expression><![CDATA[$F{NetBalance}]]></expression>
+            </element>
+        </band>
+    </detail>
+    <columnFooter height="10" splitType="Stretch"/>
+    <pageFooter height="40" splitType="Stretch">
+        <element kind="line" uuid="6e4199fa-7fc9-4c62-8d5f-9dbad32e6d6e" x="0" y="0" width="555" height="1">
+            <pen lineWidth="0.5" lineColor="#CFEADD"/>
+        </element>
+        <element kind="textField" uuid="c1f0bf8a-854f-483a-afb4-40012ea58dde" x="0" y="8" width="350" height="18" forecolor="#6C7A89" fontSize="10.0" italic="true">
+            <expression><![CDATA[$F{group_name}  +"  •  Confidential  •  Computer Generated"]]></expression>
+        </element>
+        <element kind="textField" uuid="d11be24b-5253-4eb6-9a5d-bebb51a9224e" x="355" y="8" width="200" height="18" forecolor="#6C7A89" fontSize="8.0" italic="true" hTextAlign="Right">
+            <expression><![CDATA["Page " + $V{PAGE_NUMBER}]]></expression>
+        </element>
+    </pageFooter>
+    <summary height="170" splitType="Stretch">
+        <element kind="line" uuid="ba98602d-bf41-491b-9099-31ad951b9163" x="0" y="15" width="555" height="2">
+            <pen lineWidth="2.0" lineColor="#1E8449"/>
+        </element>
+        <element kind="staticText" uuid="90d1b7c3-292c-4ee6-b3a6-35af9e046e83" x="0" y="25" width="555" height="18" forecolor="#1E2B3C" fontSize="11.0" bold="true">
+            <text><![CDATA[Signatories]]></text>
+        </element>
+        <element kind="line" uuid="c3ea49f0-4d3e-4ea6-b2e4-c0581afe020a" x="10" y="65" width="240" height="1">
+            <pen lineWidth="0.5" lineColor="#34495E"/>
+        </element>
+        <element kind="staticText" uuid="ade5c5c7-87e3-410b-9956-ce4e6ded5a61" x="10" y="70" width="240" height="18" forecolor="#6C7A89" fontSize="11.0">
+            <text><![CDATA[Chairman Signature & Date]]></text>
+        </element>
+        <element kind="line" uuid="6cada9a8-a793-4ad3-964e-952fbbb81e9f" x="305" y="65" width="240" height="1">
+            <pen lineWidth="0.5" lineColor="#34495E"/>
+        </element>
+        <element kind="staticText" uuid="ed04bce4-061c-43ee-872a-394492baf1c7" x="305" y="70" width="240" height="18" forecolor="#6C7A89" fontSize="11.0">
+            <text><![CDATA[Treasurer Signature & Date]]></text>
+        </element>
+        <element kind="staticText" uuid="32cdb0f8-e7a6-49f9-947c-c8c7670d9b30" x="0" y="130" width="555" height="16" forecolor="#B0BCC7" fontSize="10.0" italic="true" hTextAlign="Center">
+            <text><![CDATA[This statement is computer-generated. Please verify with the group signatories.]]></text>
+        </element>
+    </summary>
+</jasperReport>
